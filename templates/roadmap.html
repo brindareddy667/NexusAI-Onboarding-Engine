@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nexus AI | Roadmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* CSS for the Technical Challenge Box */
+        .challenge-box {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 2px solid #fb923c;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 32px;
+            box-shadow: 0 10px 15px -3px rgba(251, 146, 60, 0.1);
+        }
+        .challenge-box h3 {
+            color: #c2410c !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .challenge-box h3::before {
+            content: "⚡";
+            background: #f97316;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        .lesson-content { line-height: 1.8; color: #334155; }
+        .lesson-content h1, .lesson-content h2 { color: #1e1b4b; font-weight: 800; margin-top: 1.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<nav class="glass-nav px-8 py-5 sticky top-0 flex justify-between items-center z-40 bg-white/80 backdrop-blur-md border-b">
+    <span class="text-2xl font-extrabold">Nexus<span class="text-indigo-600">AI</span></span>
+    <div class="flex items-center space-x-4">
+        <span id="pText" class="text-sm font-bold text-indigo-600">0%</span>
+        <div class="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div id="pBar" class="bg-indigo-600 h-full transition-all duration-700" style="width:0%"></div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-6xl mx-auto py-12 px-6 flex gap-8">
+    <div class="flex-grow space-y-6">
+        <div class="premium-card p-10 bg-white rounded-3xl shadow-sm border">
+            <h2 class="text-2xl font-bold mb-8 italic text-slate-400">Onboarding Roadmap</h2>
+            <div id="tasks" class="space-y-6"></div>
+        </div>
+
+        <div id="assessmentSection" class="premium-card p-8 hidden border-2 border-indigo-500 bg-indigo-50 rounded-3xl shadow-lg">
+            <h3 class="text-xl font-bold mb-2">Final Assessment Unlocked! ✨</h3>
+            <p class="text-slate-600 mb-4">You've completed all tasks and submitted your evidence. Ready to get certified?</p>
+            <button onclick="window.location.href='/assessment'" class="btn-indigo bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all">
+                Start Final Assessment
+            </button>
+        </div>
+    </div>
+
+    <div class="w-96 h-[600px] flex flex-col premium-card sticky top-28 overflow-hidden bg-white border rounded-3xl shadow-sm">
+        <div class="bg-indigo-600 p-5 text-white font-bold text-center">Nexus Support Agent</div>
+        <div id="chatBox" class="flex-grow p-4 overflow-y-auto space-y-3 text-sm bg-slate-50"></div>
+        <div class="p-4 bg-white border-t">
+            <input id="chatInput" class="w-full bg-slate-100 p-3 rounded-xl outline-none" placeholder="Ask about policies..." onkeydown="if(event.key==='Enter') sendMessage()">
+        </div>
+    </div>
+</main>
+
+<div id="contentModal" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-3xl max-h-[85vh] shadow-2xl overflow-y-auto">
+        <div id="docText" class="lesson-content prose prose-slate"></div>
+        <div class="flex justify-end mt-8">
+            <button onclick="closeContent()" class="bg-indigo-600 text-white px-8 py-2 rounded-xl font-bold">Close Lesson</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const email = localStorage.getItem("userEmail");
+
+async function loadTasks() {
+    const res = await fetch(`/tasks?email=${email}`);
+    const tasks = await res.json();
+    const box = document.getElementById("tasks");
+    box.innerHTML = "";
+
+    let done = 0;
+    tasks.forEach(t => {
+        if (t.status === "DONE") done++;
+        
+        box.innerHTML += `
+            <div class="p-6 rounded-2xl border transition-all ${t.status === 'DONE' ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'}">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest">Day ${t.day}</span>
+                        <h3 class="text-lg font-bold">${t.title}</h3>
+                        <p class="text-sm text-slate-500 mt-1">${t.desc}</p>
+                    </div>
+                    ${t.status === 'DONE' ? '<span class="text-emerald-500 text-2xl">✅</span>' : ''}
+                </div>
+                
+                <div class="flex flex-col gap-3">
+                    ${t.ref_file ? `<button onclick="viewContent('${t.ref_file}')" class="text-indigo-600 text-sm font-bold text-left underline hover:text-indigo-800">📖 View Lesson & Technical Challenge</button>` : ''}
+                    
+                    ${t.status !== 'DONE' ? `
+                        <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                            <p class="text-xs font-bold text-slate-400 mb-2 uppercase">Submit Evidence (Link or File)</p>
+                            <div class="flex flex-col gap-3">
+                                <input type="text" id="link-${t.id}" placeholder="GitHub / Doc Link" class="w-full p-2 border rounded-lg text-sm bg-white">
+                                <div class="flex items-center gap-2">
+                                    <input type="file" id="file-${t.id}" class="text-xs flex-grow cursor-pointer">
+                                    <button onclick="submitTask(${t.id})" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-indigo-700">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : `<p class="mt-2 text-emerald-600 text-xs font-medium italic">Verified Evidence: ${t.link}</p>`}
+                </div>
+            </div>`;
+    });
+
+    updateProgress(done, tasks.length);
+    checkAssessmentUnlock();
+}
+
+async function viewContent(filename) {
+    const res = await fetch(`/document-content?filename=${encodeURIComponent(filename)}`);
+    const data = await res.json();
+    
+    // Inject Challenge Box HTML Class
+    let html = data.content
+        .replace(/TECHNICAL CHALLENGE/gi, '<div class="challenge-box"><h3>Technical Challenge</h3>')
+        .replace(/\n/g, '<br>');
+    
+    if (html.includes('challenge-box')) html += '</div>';
+    
+    document.getElementById("docText").innerHTML = `<div class="lesson-content">${html}</div>`;
+    document.getElementById("contentModal").classList.remove("hidden");
+}
+
+function closeContent() { document.getElementById("contentModal").classList.add("hidden"); }
+
+async function submitTask(id) {
+    const linkVal = document.getElementById(`link-${id}`).value;
+    const fileInput = document.getElementById(`file-${id}`);
+    const fileObj = fileInput.files[0];
+
+    if (!linkVal && !fileObj) return alert("Please provide a link or upload a file as evidence.");
+    
+    const fd = new FormData();
+    fd.append("task_id", id);
+    if (linkVal) fd.append("link", linkVal);
+    if (fileObj) fd.append("file", fileObj);
+    
+    await fetch("/tasks/submit", { method: "POST", body: fd });
+    loadTasks();
+}
+
+function updateProgress(done, total) {
+    const percent = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById("pText").innerText = percent + "%";
+    document.getElementById("pBar").style.width = percent + "%";
+}
+
+async function checkAssessmentUnlock() {
+    const res = await fetch(`/assessment-status?email=${email}`);
+    const data = await res.json();
+    document.getElementById("assessmentSection").classList.toggle("hidden", !data.unlocked);
+}
+
+async function sendMessage() {
+    const input = document.getElementById("chatInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const chat = document.getElementById("chatBox");
+    chat.innerHTML += `<div class="text-right"><div class="bg-indigo-600 text-white p-2 rounded-xl inline-block shadow-sm">${msg}</div></div>`;
+    input.value = "";
+
+    const res = await fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({question: msg, email})
+    });
+    const data = await res.json();
+    chat.innerHTML += `<div class="text-left"><div class="bg-white p-2 rounded-xl border inline-block shadow-sm">${data.answer}</div></div>`;
+    chat.scrollTop = chat.scrollHeight;
+}
+
+loadTasks();
+</script>
+</body>
+</html>

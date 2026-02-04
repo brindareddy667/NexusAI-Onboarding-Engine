@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+:root {
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-600: #475569;
+    --slate-100: #f1f5f9;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f8fafc;
+    color: var(--slate-900);
+}
+
+.glass-nav {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.premium-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid var(--slate-100);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+}
+
+.premium-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.04);
+}
+
+.btn-indigo {
+    background: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.btn-indigo:hover {
+    background: #4338ca;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.chat-bubble {
+    border-radius: 18px 18px 2px 18px;
+    background: var(--primary);
+    color: white;
+}
+.challenge-box {
+    background: #fff7ed; /* Soft orange background */
+    border: 2px solid #fb923c;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 30px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(251, 146, 60, 0.1);
+}
+
+.challenge-box h3 {
+    color: #ea580c;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.challenge-box h3::before {
+    content: "🚀";
+}
+
+.challenge-box p {
+    color: #9a3412;
+    line-height: 1.6;
+    font-weight: 500;
+}
+/* Document Content Beautification */
+.lesson-content {
+    line-height: 1.8;
+    color: #334155;
+    font-size: 1.05rem;
+}
+
+.lesson-content h1, .lesson-content h2 {
+    color: #1e1b4b;
+    font-weight: 800;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.lesson-content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+/* The High-Impact Challenge Box */
+.challenge-box {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border: 2px solid #fb923c;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 32px;
+    box-shadow: 0 10px 15px -3px rgba(251, 146, 60, 0.1);
+}
+
+.challenge-box h3 {
+    color: #c2410c !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.challenge-box h3::before {
+    content: "⚡";
+    background: #f97316;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 8px;
+}

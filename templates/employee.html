@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Nexus AI | Onboarding</title>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav class="p-6 bg-white shadow-sm flex justify-between items-center">
+        <span class="text-2xl font-black">Nexus<span class="text-indigo-600">AI</span></span>
+    </nav>
+
+    <main class="max-w-4xl mx-auto py-12 px-6">
+        <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
+            <h2 class="text-3xl font-black mb-6">Begin Your Journey</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Full Name</label>
+                    <input type="text" id="user-name" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Work Email</label>
+                    <input type="email" id="user-email" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Your Role</label>
+                <select id="user-role" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+                    <option value="DEVELOPER">Developer</option>
+                    <option value="HR">HR Specialist</option>
+                    <option value="INTERN">Intern</option>
+                </select>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Upload Resume (PDF)</label>
+                <input type="file" id="user-resume" class="w-full">
+            </div>
+
+            <button onclick="handleSetup()" id="gen-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all">
+                Initialize My Onboarding
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const API = "http://localhost:8000";
+
+        async function handleSetup() {
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const role = document.getElementById('user-role').value;
+            const resumeInput = document.getElementById('user-resume');
+            const btn = document.getElementById('gen-btn');
+
+            if (!name || !email || !resumeInput.files[0]) {
+                return alert("Please fill all fields and upload your resume.");
+            }
+
+            btn.innerText = "Setting up your workspace...";
+            btn.disabled = true;
+
+            const fd = new FormData();
+            fd.append('name', name);
+            fd.append('email', email);
+            fd.append('role', role);
+            fd.append('resume_file', resumeInput.files[0]);
+
+            try {
+                const res = await fetch("/generate-roadmap", { method: 'POST', body: fd });
+                if (res.ok) {
+                    // Save email to localStorage so the roadmap page knows which tasks to show
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userName', name);
+                    window.location.href = "/roadmap";
+                }
+            } catch (e) {
+                alert("Backend error. Check terminal.");
+            }
+        }
+    </script>
+</body>
+</html>

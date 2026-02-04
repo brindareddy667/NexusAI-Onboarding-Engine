@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NexusAI Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-slate-50 flex justify-center items-center min-h-screen">
+<div class="premium-card p-10 w-full max-w-2xl">
+    <h2 class="text-2xl font-bold mb-6 text-center">Final Assessment</h2>
+    <div id="quiz"></div>
+    <div class="flex justify-between mt-6">
+        <p id="progress" class="text-slate-400 text-sm italic self-center"></p>
+        <div>
+            <button id="nextBtn" class="btn-indigo" onclick="nextQ()">Next</button>
+            <button id="submitBtn" class="btn-indigo hidden" onclick="submitQuiz()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="resMod" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-3xl text-center w-[400px]">
+        <h3 id="resTitle" class="text-2xl font-bold mb-2"></h3>
+        <p id="resText" class="text-slate-500 mb-6"></p>
+        <button onclick="location.href='/dashboard'" class="btn-indigo w-full">Done</button>
+    </div>
+</div>
+
+<script>
+let questions = []; let current = 0; let answers = {};
+
+async function load() {
+    const res = await fetch(`/quiz?email=${localStorage.getItem("userEmail")}`);
+    const data = await res.json();
+    questions = data.questions;
+    render();
+}
+
+function render() {
+    const q = questions[current]; const box = document.getElementById("quiz");
+    document.getElementById("progress").innerText = `Step ${current+1} / ${questions.length}`;
+    if(q.type === 'mcq') {
+        box.innerHTML = `<p class="font-bold mb-4 text-lg">${q.question}</p>`;
+        q.options.forEach(o => {
+            box.innerHTML += `<label class="block border p-3 rounded-xl mb-2 cursor-pointer hover:bg-slate-50">
+                <input type="radio" name="q" onchange="answers[${current}]='${o}'" ${answers[current]===o?'checked':''}> ${o}
+            </label>`;
+        });
+    } else {
+        box.innerHTML = `<p class="text-indigo-600 font-bold mb-1">Scenario</p><p class="mb-4">${q.question}</p>
+            <textarea class="w-full p-4 border rounded-xl h-32" oninput="answers[${current}]=this.value">${answers[current]||''}</textarea>`;
+    }
+    document.getElementById("nextBtn").classList.toggle("hidden", current === questions.length-1);
+    document.getElementById("submitBtn").classList.toggle("hidden", current !== questions.length-1);
+}
+
+function nextQ() { current++; render(); }
+
+async function submitQuiz() {
+    let score = 0;
+    questions.forEach((q, i) => {
+        if(q.type==='mcq' && answers[i]===q.answer) score++;
+        if(q.type==='scenario' && (answers[i]||'').length > 15) score++;
+    });
+    const fd = new FormData(); fd.append("email", localStorage.getItem("userEmail")); fd.append("score", score);
+    await fetch("/save-result", { method: "POST", body: fd });
+    
+    document.getElementById("resTitle").innerText = score >= 9 ? "Success!" : "Needs Review";
+    document.getElementById("resText").innerText = `You scored ${score}/15. Your results are logged in HR Dashboard.`;
+    document.getElementById("resMod").classList.remove("hidden");
+}
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HR Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="bg-slate-50">
+
+<nav class="glass-nav px-8 py-5">
+    <h1 class="text-2xl font-extrabold">
+        Nexus<span class="text-indigo-600">AI</span> — HR Dashboard
+    </h1>
+</nav>
+
+<main class="max-w-7xl mx-auto py-12 px-6">
+
+<div class="premium-card overflow-hidden">
+    <table class="w-full text-left">
+        <thead class="bg-slate-100">
+            <tr>
+                <th class="p-4">Employee</th>
+                <th class="p-4">Role</th>
+                <th class="p-4">Progress</th>
+                <th class="p-4">Quiz</th>
+                <th class="p-4">Status</th>
+            </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+    </table>
+</div>
+
+</main>
+
+<script>
+async function loadHR() {
+    const res = await fetch("/hr-data");
+    const data = await res.json();
+    const rows = document.getElementById("rows");
+
+    rows.innerHTML = "";
+
+    if (data.length === 0) {
+        rows.innerHTML = `
+            <tr>
+                <td colspan="5" class="p-6 text-center text-slate-400">
+                    No onboarding data available yet.
+                </td>
+            </tr>`;
+        return;
+    }
+
+    data.forEach(u => {
+        rows.innerHTML += `
+            <tr class="border-b">
+                <td class="p-4">
+                    <p class="font-bold">${u.name}</p>
+                    <p class="text-xs text-slate-400">${u.email}</p>
+                </td>
+                <td class="p-4">${u.role}</td>
+                <td class="p-4">${u.progress}%</td>
+                <td class="p-4">${u.score}</td>
+                <td class="p-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold
+                        ${u.status === 'PASSED'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : u.status === 'FAILED'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-yellow-100 text-yellow-700'}">
+                        ${u.status}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+loadHR();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Nexus AI | HR Portal</title>
+</head>
+<body>
+    <nav class="glass-nav px-8 py-5 flex justify-between items-center sticky top-0">
+        <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-extrabold shadow-lg shadow-indigo-200">N</div>
+            <span class="text-2xl font-extrabold tracking-tight">Nexus<span class="text-indigo-600">AI</span></span>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto py-20 px-6">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold mb-4">Train Your Agent</h1>
+            <p class="text-slate-500 text-lg">Upload multiple company policies and training manuals.</p>
+        </div>
+
+        <div class="premium-card p-10 text-center">
+            <div class="border-2 border-dashed border-slate-200 rounded-3xl p-12 mb-8 hover:border-indigo-400 cursor-pointer transition-colors"
+                 onclick="document.getElementById('files').click()">
+                <div class="text-indigo-600 mb-4 text-5xl">📄</div>
+                <p class="font-bold text-slate-700">Click to Select Multiple PDF / DOCX Files</p>
+                <input type="file" id="files" multiple class="hidden" onchange="previewFiles()">
+            </div>
+
+            <div id="preview" class="text-left mb-8 space-y-2"></div>
+
+            <button onclick="upload()" id="upBtn" class="btn-indigo w-full text-lg">
+                Begin AI Ingestion
+            </button>
+        </div>
+    </main>
+
+    <script>
+        function previewFiles() {
+            const files = document.getElementById('files').files;
+            document.getElementById('preview').innerHTML =
+                Array.from(files)
+                    .map(f => `<div class="bg-slate-50 p-2 rounded-lg text-sm">✓ ${f.name}</div>`)
+                    .join('');
+        }
+
+        async function upload() {
+            const btn = document.getElementById('upBtn');
+            btn.innerText = "Classifying documents...";
+            btn.disabled = true;
+
+            const fd = new FormData();
+            for (let f of document.getElementById('files').files) {
+                fd.append('files', f);
+            }
+
+            await fetch('/upload', {
+                method: 'POST',
+                body: fd
+            });
+
+            window.location.href = '/employee';
+        }
+    </script>
+</body>
+</html>
+
